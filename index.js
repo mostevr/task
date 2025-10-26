@@ -27,6 +27,18 @@ process.on("SIGINT", async () => {
 // 1️⃣ GET /client/:id/balance
 //    ➤ Purpose: Return the balance of a specific client.
 //    ➤ Response: { id, name, balance }
+app.get("/client/:id/balance", async (req, res) => {
+  try {
+    const clientId = parseInt(req.params.id);
+    const result = await db.query(`SELECT id, name, balance FROM client WHERE id = ${clientId}`);
+    if (result.rows.length === 0) {
+      return res.status(404).send({ message: "Client not found" });
+    }
+    res.send(result.rows[0]);
+  } catch (error) {
+    res.status(500).send({ message: "اكو مشكله بالدنيا..." });
+  }
+});
 //
 // 2️⃣ GET /stock/available
 //    ➤ Purpose: Return the number of “ready” cards for each plan.
@@ -35,6 +47,17 @@ process.on("SIGINT", async () => {
 //          { planId: 1, planName: "Zain 5K", available: 25 },
 //          { planId: 2, planName: "Google Play 10$", available: 10 }
 //        ]
+app.get("/stock/available", async (req, res) => {
+  try {
+    const result = await db.query(`
+                    SELECT plan.id , plan.name , COUNT(stock.id) FROM plan JOIN stock 
+                    ON plan.id = stock.plan_id AND stock.state = 'ready'
+                    GROUP BY plan.id, plan.name;`);
+    res.send(result.rows);
+  } catch (error) {
+    res.status(500).send({ message: "اكو مشكله بالدنيا..." });
+  }
+});
 //
 // 3️⃣ GET /stock/sold
 //    ➤ Purpose: Count sold cards for each plan.
