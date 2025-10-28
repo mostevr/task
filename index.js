@@ -152,7 +152,7 @@ app.get("/invoice/client/:id", async (req, res) => {
   try {
     const clientId = parseInt(req.params.id);
     const result = await db.query(`
-                    SELECT id, plan_id, amount, created_at 
+                    SELECT id, plan_id, created_at 
                     FROM invoice 
                     WHERE client_id = ${clientId}
                     ORDER BY created_at DESC
